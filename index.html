@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field Commander — Baseball Lineup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@300;400;600&family=Source+Serif+4:ital,wght@0,300;0,600;1,300&display=swap');
+
+  :root {
+    --grass: #1a3a1a;
+    --grass-light: #2d5a2d;
+    --grass-mid: #234823;
+    --dirt: #8B5E3C;
+    --dirt-light: #c4874a;
+    --cream: #f5edd8;
+    --chalk: #fffef5;
+    --red: #c0392b;
+    --gold: #d4a843;
+    --bench: #5a3e2b;
+    --ink: #1a1208;
+    --infield-bg: #2a6b4a;
+    --outfield-bg: #1e4d2b;
+    --shadow: rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--grass);
+    color: var(--cream);
+    font-family: 'Source Serif 4', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 60px,
+        rgba(255,255,255,0.015) 60px,
+        rgba(255,255,255,0.015) 61px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 60px,
+        rgba(255,255,255,0.015) 60px,
+        rgba(255,255,255,0.015) 61px
+      );
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--ink);
+    border-bottom: 4px solid var(--dirt-light);
+    padding: 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(212,168,67,0.04) 10px,
+      rgba(212,168,67,0.04) 11px
+    );
+  }
+  .header-inner {
+    position: relative;
+    padding: 28px 20px 20px;
+  }
+  .header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    letter-spacing: 0.12em;
+    color: var(--chalk);
+    text-shadow: 3px 3px 0 var(--dirt), 5px 5px 0 rgba(0,0,0,0.4);
+    line-height: 1;
+  }
+  .header .subtitle {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .stitches {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .stitch {
+    width: 20px; height: 8px;
+    border: 2px solid var(--red);
+    border-radius: 50%;
+    transform: rotate(-20deg);
+  }
+  .stitch:nth-child(even) { transform: rotate(20deg); }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 16px;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 820px) {
+    .main { grid-template-columns: 1fr; }
+  }
+
+  /* PANEL */
+  .panel {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .panel-header {
+    background: var(--ink);
+    border-bottom: 2px solid var(--dirt);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+  }
+  .panel-body { padding: 16px; }
+
+  /* ROSTER */
+  .roster-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .roster-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .roster-item:hover { background: rgba(255,255,255,0.08); }
+  .roster-item.checked {
+    background: rgba(45, 90, 45, 0.45);
+    border-color: var(--grass-light);
+  }
+  .roster-item input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--gold);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .player-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: var(--dirt-light);
+    min-width: 24px;
+    text-align: center;
+  }
+  .player-name {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 400;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    color: var(--cream);
+  }
+  .present-badge {
+    margin-left: auto;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--grass-light);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .roster-item.checked .present-badge { opacity: 1; color: #6fba6f; }
+
+  .select-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .select-controls button {
+    flex: 1;
+    padding: 6px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.6);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .select-controls button:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--cream);
+  }
+
+  .compute-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    background: var(--red);
+    border: none;
+    color: var(--chalk);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  .compute-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
+    pointer-events: none;
+  }
+  .compute-btn:hover {
+    background: #a93226;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+  }
+  .compute-btn:active { transform: translateY(0); }
+  .compute-btn:disabled {
+    background: #444;
+    color: #888;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .player-count {
+    text-align: center;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.45);
+    margin-top: 10px;
+    letter-spacing: 0.05em;
+  }
+  .player-count span {
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* ERROR / INFO */
+  .message-box {
+    padding: 12px 14px;
+    border-radius: 3px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+    margin-top: 12px;
+    display: none;
+  }
+  .message-box.error {
+    background: rgba(192, 57, 43, 0.25);
+    border: 1px solid rgba(192,57,43,0.5);
+    color: #f1a090;
+    display: block;
+  }
+  .message-box.warn {
+    background: rgba(212,168,67,0.15);
+    border: 1px solid rgba(212,168,67,0.4);
+    color: var(--gold);
+    display: block;
+  }
+
+  /* LINEUP TABLE */
+  .lineup-section { display: none; }
+  .lineup-section.visible { display: block; }
+
+  .lineup-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .lineup-meta {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+  }
+
+  .inning-card {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 4px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    animation: slideIn 0.3s ease both;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .inning-card:nth-child(1) { animation-delay: 0.05s; }
+  .inning-card:nth-child(2) { animation-delay: 0.1s; }
+  .inning-card:nth-child(3) { animation-delay: 0.15s; }
+  .inning-card:nth-child(4) { animation-delay: 0.2s; }
+  .inning-card:nth-child(5) { animation-delay: 0.25s; }
+  .inning-card:nth-child(6) { animation-delay: 0.3s; }
+
+  .inning-header {
+    background: rgba(0,0,0,0.4);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .inning-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    color: var(--dirt-light);
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+  .inning-label {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 300;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+  }
+  .bench-tag {
+    margin-left: auto;
+    background: var(--bench);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--dirt-light);
+  }
+
+  .positions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1px;
+    background: rgba(255,255,255,0.04);
+  }
+  .position-cell {
+    background: rgba(0,0,0,0.2);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    transition: background 0.15s;
+  }
+  .position-cell:hover { background: rgba(255,255,255,0.04); }
+  .position-cell.infield { border-left: 2px solid var(--dirt); }
+  .position-cell.outfield { border-left: 2px solid var(--grass-light); }
+  .position-cell.catcher { border-left: 2px solid var(--gold); }
+  .position-cell.bench-cell {
+    border-left: 2px solid var(--bench);
+    opacity: 0.7;
+  }
+
+  .pos-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+  }
+  .pos-name {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 400;
+    font-size: 0.9rem;
+    color: var(--cream);
+    letter-spacing: 0.03em;
+  }
+  .pos-abbr {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.05em;
+  }
+
+  /* STATS TABLE */
+  .stats-section {
+    margin-top: 20px;
+    display: none;
+  }
+  .stats-section.visible { display: block; }
+
+  .stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+  }
+  .stats-table th {
+    background: var(--ink);
+    color: var(--gold);
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--dirt);
+  }
+  .stats-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.75);
+  }
+  .stats-table tr:hover td { background: rgba(255,255,255,0.03); }
+  .stats-table .player-col {
+    font-weight: 600;
+    color: var(--cream);
+    letter-spacing: 0.03em;
+  }
+  .inning-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .dot {
+    width: 22px; height: 22px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1;
+    text-align: center;
+  }
+  .dot.infield { background: rgba(139,94,60,0.6); color: #e8c49a; }
+  .dot.outfield { background: rgba(45,90,45,0.6); color: #9fd99f; }
+  .dot.catcher { background: rgba(212,168,67,0.3); color: var(--gold); }
+  .dot.bench { background: rgba(90,62,43,0.5); color: rgba(255,255,255,0.3); }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.05em;
+  }
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 1px;
+    flex-shrink: 0;
+  }
+
+  .violations-box {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(192,57,43,0.15);
+    border: 1px solid rgba(192,57,43,0.3);
+    border-radius: 3px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    color: #f1a090;
+    display: none;
+  }
+  .violations-box.visible { display: block; }
+  .violations-box ul { margin-top: 6px; padding-left: 16px; }
+  .violations-box li { margin-bottom: 3px; }
+
+  .success-banner {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(45,90,45,0.3);
+    border: 1px solid rgba(45,90,45,0.5);
+    border-radius: 3px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    color: #9fd99f;
+    letter-spacing: 0.04em;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+  .success-banner.visible { display: flex; }
+
+  /* FIELD ICON */
+  .field-icon {
+    width: 20px; height: 20px;
+    flex-shrink: 0;
+  }
+
+  .divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>Field Commander</h1>
+    <div class="subtitle">Youth Baseball Defense Lineup Generator</div>
+    <div class="stitches">
+      <div class="stitch"></div><div class="stitch"></div><div class="stitch"></div>
+      <div class="stitch"></div><div class="stitch"></div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- LEFT: ROSTER PANEL -->
+  <div>
+    <div class="panel">
+      <div class="panel-header">
+        <svg class="field-icon" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="9" stroke="#d4a843" stroke-width="1.5"/>
+          <path d="M10 1v18M1 10h18M4 4l12 12M16 4L4 16" stroke="#d4a843" stroke-width="0.8" opacity="0.4"/>
+        </svg>
+        <h2>Team Roster</h2>
+      </div>
+      <div class="panel-body">
+        <div class="select-controls">
+          <button onclick="selectAll()">All Present</button>
+          <button onclick="selectNone()">Clear All</button>
+        </div>
+        <ul class="roster-list" id="rosterList"></ul>
+        <div class="player-count">
+          <span id="presentCount">0</span> of 10 players present
+        </div>
+        <div id="rosterMessage" class="message-box"></div>
+        <button class="compute-btn" id="computeBtn" onclick="computeLineup()" disabled>
+          ⚾ Compute Defense Positions
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: LINEUP OUTPUT -->
+  <div>
+    <div class="lineup-section" id="lineupSection">
+      <div class="lineup-title" id="lineupTitle"></div>
+      <div class="lineup-meta" id="lineupMeta"></div>
+
+      <div class="success-banner" id="successBanner">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" stroke="#6fba6f" stroke-width="1.5"/>
+          <path d="M4.5 8.5l2.5 2.5L11.5 5.5" stroke="#6fba6f" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        All rules satisfied — lineup is valid!
+      </div>
+
+      <div class="violations-box" id="violationsBox">
+        ⚠ Rule violations detected:
+        <ul id="violationsList"></ul>
+      </div>
+
+      <div id="inningCards"></div>
+
+      <div class="divider"></div>
+
+      <div class="stats-section" id="statsSection">
+        <div class="panel-header" style="background:rgba(0,0,0,0.4); border-bottom:2px solid var(--dirt); border-radius:3px 3px 0 0;">
+          <h2>Player Summary</h2>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(139,94,60,0.6);"></div>Infield</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(45,90,45,0.6);"></div>Outfield</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(212,168,67,0.3);"></div>Catcher</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(90,62,43,0.5);"></div>Bench</div>
+        </div>
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Innings</th>
+              <th>IF</th>
+              <th>OF</th>
+              <th>C</th>
+              <th>Bench</th>
+            </tr>
+          </thead>
+          <tbody id="statsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Placeholder -->
+    <div id="placeholderMsg" style="text-align:center; padding:60px 20px; opacity:0.3;">
+      <div style="font-family:'Bebas Neue',sans-serif; font-size:4rem; color:var(--dirt-light); line-height:1;">⚾</div>
+      <div style="font-family:'Oswald',sans-serif; letter-spacing:0.2em; font-size:0.85rem; margin-top:12px; text-transform:uppercase;">Select players &amp; compute lineup</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── ROSTER DATA ──────────────────────────────────────────────────────────────
+const PLAYERS = [
+  { id: 0, name: "Alex Rivera",    num: "1" },
+  { id: 1, name: "Jordan Lee",     num: "4" },
+  { id: 2, name: "Sam Torres",     num: "7" },
+  { id: 3, name: "Casey Morgan",   num: "10" },
+  { id: 4, name: "Blake Nguyen",   num: "13" },
+  { id: 5, name: "Taylor Kim",     num: "16" },
+  { id: 6, name: "Quinn Davis",    num: "19" },
+  { id: 7, name: "Riley Chen",     num: "22" },
+  { id: 8, name: "Morgan Patel",   num: "25" },
+  { id: 9, name: "Avery Thompson", num: "28" },
+];
+
+// Positions: 0=P, 1=C, 2=1B, 3=2B, 4=3B, 5=SS, 6=LF, 7=CF, 8=RF
+const POSITIONS = [
+  { abbr:"P",  label:"Pitcher",       type:"infield"  },
+  { abbr:"C",  label:"Catcher",       type:"catcher"  },
+  { abbr:"1B", label:"First Base",    type:"infield"  },
+  { abbr:"2B", label:"Second Base",   type:"infield"  },
+  { abbr:"3B", label:"Third Base",    type:"infield"  },
+  { abbr:"SS", label:"Shortstop",     type:"infield"  },
+  { abbr:"LF", label:"Left Field",    type:"outfield" },
+  { abbr:"CF", label:"Center Field",  type:"outfield" },
+  { abbr:"RF", label:"Right Field",   type:"outfield" },
+];
+const INFIELD_POS  = [0,2,3,4,5];   // P,1B,2B,3B,SS (counts as infield)
+const OUTFIELD_POS = [6,7,8];        // LF,CF,RF
+const CATCHER_POS  = [1];
+const NUM_INNINGS  = 6;
+const NUM_POSITIONS = 9;
+
+// ─── ROSTER UI ───────────────────────────────────────────────────────────────
+const selected = new Set();
+
+function buildRoster() {
+  const list = document.getElementById('rosterList');
+  PLAYERS.forEach(p => {
+    const li = document.createElement('li');
+    li.className = 'roster-item';
+    li.dataset.id = p.id;
+    li.innerHTML = `
+      <input type="checkbox" id="cb${p.id}" onchange="togglePlayer(${p.id})">
+      <span class="player-num">#${p.num}</span>
+      <label class="player-name" for="cb${p.id}">${p.name}</label>
+      <span class="present-badge">PRESENT</span>
+    `;
+    li.addEventListener('click', e => {
+      if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'LABEL') {
+        const cb = li.querySelector('input');
+        cb.checked = !cb.checked;
+        togglePlayer(p.id);
+      }
+    });
+    list.appendChild(li);
+  });
+}
+
+function togglePlayer(id) {
+  if (selected.has(id)) selected.delete(id); else selected.add(id);
+  document.getElementById(`cb${id}`).checked = selected.has(id);
+  document.querySelector(`[data-id="${id}"]`).classList.toggle('checked', selected.has(id));
+  updateCount();
+}
+
+function updateCount() {
+  const n = selected.size;
+  document.getElementById('presentCount').textContent = n;
+  const btn = document.getElementById('computeBtn');
+  const msg = document.getElementById('rosterMessage');
+  msg.className = 'message-box';
+  if (n < 9) {
+    btn.disabled = true;
+    if (n > 0) { msg.textContent = `Need at least 9 players. Add ${9-n} more.`; msg.className = 'message-box error'; }
+  } else if (n > 10) {
+    btn.disabled = true;
+    msg.textContent = 'Maximum 10 players. Uncheck some.'; msg.className = 'message-box error';
+  } else {
+    btn.disabled = false;
+    if (n === 10) { msg.textContent = 'All 10 players — each inning has 1 bench player.'; msg.className = 'message-box warn'; }
+  }
+}
+
+function selectAll()  { PLAYERS.forEach(p => { selected.add(p.id); document.getElementById(`cb${p.id}`).checked=true; document.querySelector(`[data-id="${p.id}"]`).classList.add('checked'); }); updateCount(); }
+function selectNone() { PLAYERS.forEach(p => { selected.delete(p.id); document.getElementById(`cb${p.id}`).checked=false; document.querySelector(`[data-id="${p.id}"]`).classList.remove('checked'); }); updateCount(); }
+
+// ─── LINEUP COMPUTATION ───────────────────────────────────────────────────────
+function computeLineup() {
+  const presentIds = Array.from(selected).sort((a,b) => a-b);
+  const hasBench = presentIds.length === 10;
+
+  let best = null;
+  let bestViolations = Infinity;
+
+  for (let attempt = 0; attempt < 200; attempt++) {
+    const result = tryAssign(presentIds, hasBench);
+    if (result.violations === 0) { best = result; break; }
+    if (result.violations < bestViolations) { bestViolations = result.violations; best = result; }
+  }
+
+  renderLineup(best, presentIds);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function tryAssign(playerIds, hasBench) {
+  const schedule  = Array.from({length: NUM_INNINGS}, () => Array(NUM_POSITIONS).fill(null));
+  const benchSlot = Array(NUM_INNINGS).fill(null);
+  const S = {};
+  playerIds.forEach(id => S[id] = { if: 0, of: 0, bench: 0, ofStreak: 0 });
+  const benchUsed = {};
+  playerIds.forEach(id => benchUsed[id] = 0);
+
+  for (let inn = 0; inn < NUM_INNINGS; inn++) {
+    // ── Bench selection (Rule 3: fair rotation) ──────────────────────────────
+    let benchId = null;
+    if (hasBench) {
+      const minSit = Math.min(...playerIds.map(id => benchUsed[id]));
+      const elig = shuffle(playerIds.filter(id => benchUsed[id] === minSit));
+      benchId = elig[0];
+      benchSlot[inn] = benchId;
+      benchUsed[benchId]++;
+      S[benchId].bench++;
+    }
+
+    const active = playerIds.filter(id => id !== benchId);
+    const innLeft = NUM_INNINGS - inn; // innings remaining incl. this one
+
+    const IF_SLOTS = INFIELD_POS.length;  // 5
+    const OF_SLOTS = OUTFIELD_POS.length; // 3
+    const C_SLOTS  = CATCHER_POS.length;  // 1
+
+    // ── Categorize each player ───────────────────────────────────────────────
+    const mustIF = [], mustOF = [], neutral = [];
+
+    active.forEach(id => {
+      const s = S[id];
+      const ifNeed = Math.max(0, 2 - s.if);
+      const ofNeed = Math.max(0, 1 - s.of);
+
+      const forceIF =
+        s.ofStreak >= 2 ||               // Rule 2: would be 3rd consecutive outfield
+        (inn < 3 && s.if === 0) ||        // Rule 4: must get infield by inning 3
+        ifNeed >= innLeft;                // Rule 5: must get infield now or never
+
+      const forceOF = !forceIF && ofNeed > 0 && (ofNeed >= innLeft - 1);
+
+      if (forceIF)      mustIF.push(id);
+      else if (forceOF) mustOF.push(id);
+      else              neutral.push(id);
+    });
+
+    // Handle mustIF overflow
+    if (mustIF.length > IF_SLOTS) {
+      mustIF.sort((a, b) => {
+        const ap = (S[a].ofStreak >= 2 ? 8 : 0) + (inn < 3 && S[a].if === 0 ? 4 : 0);
+        const bp = (S[b].ofStreak >= 2 ? 8 : 0) + (inn < 3 && S[b].if === 0 ? 4 : 0);
+        return bp - ap;
+      });
+      while (mustIF.length > IF_SLOTS) neutral.push(mustIF.pop());
+    }
+
+    // Handle mustOF overflow
+    if (mustOF.length > OF_SLOTS) {
+      while (mustOF.length > OF_SLOTS) neutral.push(mustOF.pop());
+    }
+
+    const ifPlayers  = [...mustIF];
+    const ofcPlayers = [...mustOF];
+
+    // Process neutral players sorted by infield urgency (least slack first)
+    const neutralSorted = [...neutral].sort((a, b) => {
+      const aSlack = innLeft - (2 - S[a].if);
+      const bSlack = innLeft - (2 - S[b].if);
+      return aSlack - bSlack;
+    });
+
+    for (const id of neutralSorted) {
+      const s = S[id];
+      const ofUrgent = s.of === 0 && innLeft <= 3;
+      const ifUrgent = (2 - s.if) >= (innLeft - 1);
+
+      if (ifUrgent && ifPlayers.length < IF_SLOTS)           ifPlayers.push(id);
+      else if (ofUrgent && ofcPlayers.length < OF_SLOTS + C_SLOTS) ofcPlayers.push(id);
+      else if (ifPlayers.length < IF_SLOTS)                  ifPlayers.push(id);
+      else                                                   ofcPlayers.push(id);
+    }
+
+    // Fill any missing players
+    active.filter(id => !ifPlayers.includes(id) && !ofcPlayers.includes(id)).forEach(id => {
+      if (ifPlayers.length < IF_SLOTS)           ifPlayers.push(id);
+      else                                       ofcPlayers.push(id);
+    });
+    while (ifPlayers.length > IF_SLOTS)                  ofcPlayers.push(ifPlayers.pop());
+    while (ofcPlayers.length > OF_SLOTS + C_SLOTS)       ifPlayers.push(ofcPlayers.pop());
+
+    // ── Assign infield positions ──────────────────────────────────────────────
+    const ifPos = shuffle([...INFIELD_POS]);
+    ifPlayers.forEach((pid, i) => {
+      schedule[inn][ifPos[i]] = pid;
+      S[pid].if++;
+      S[pid].ofStreak = 0;
+    });
+
+    // ── Assign outfield + catcher ─────────────────────────────────────────────
+    // Prioritize giving outfield (not catcher) to players who haven't played OF yet
+    const needsOF     = ofcPlayers.filter(id => S[id].of === 0);
+    const alreadyHasOF = ofcPlayers.filter(id => S[id].of > 0);
+    const ofAssigned  = [...shuffle(needsOF), ...shuffle(alreadyHasOF)].slice(0, OF_SLOTS);
+    const cAssigned   = ofcPlayers.filter(id => !ofAssigned.includes(id));
+
+    shuffle([...OUTFIELD_POS]).forEach((pos, i) => {
+      if (i < ofAssigned.length) {
+        schedule[inn][pos] = ofAssigned[i];
+        S[ofAssigned[i]].of++;
+        S[ofAssigned[i]].ofStreak++;
+      }
+    });
+    [...CATCHER_POS].forEach((pos, i) => {
+      if (i < cAssigned.length) {
+        schedule[inn][pos] = cAssigned[i];
+        S[cAssigned[i]].ofStreak = 0;
+      }
+    });
+  }
+
+  const vMsgs = validateSchedule(schedule, benchSlot, playerIds);
+  return { schedule, benchSlot, playerIds, violations: vMsgs.length, violationMessages: vMsgs };
+}
+
+function validateSchedule(schedule, benchSlot, playerIds) {
+  const violations = [];
+  const infieldCount  = {};
+  const outfieldCount = {};
+  const benchCount    = {};
+  playerIds.forEach(id => { infieldCount[id]=0; outfieldCount[id]=0; benchCount[id]=0; });
+
+  // Outfield streak tracking
+  const lastActive = {}; // inning-by-inning outfield
+  const ofHistory  = {}; // outfield in each inning (true/false/bench)
+  playerIds.forEach(id => ofHistory[id] = []);
+
+  for (let inn = 0; inn < NUM_INNINGS; inn++) {
+    if (benchSlot[inn] !== null) benchCount[benchSlot[inn]]++;
+
+    for (let pos = 0; pos < NUM_POSITIONS; pos++) {
+      const pid = schedule[inn][pos];
+      if (pid === null) continue;
+      if (INFIELD_POS.includes(pos)) { infieldCount[pid]++; ofHistory[pid].push('I'); }
+      else if (OUTFIELD_POS.includes(pos)) { outfieldCount[pid]++; ofHistory[pid].push('O'); }
+      else { ofHistory[pid].push('C'); } // catcher
+    }
+    if (benchSlot[inn] !== null) ofHistory[benchSlot[inn]].push('B');
+  }
+
+  // Rule 1: each player must play both infield and outfield
+  playerIds.forEach(id => {
+    const name = PLAYERS.find(p=>p.id===id).name;
+    if (infieldCount[id] === 0) violations.push(`Rule 1: ${name} never plays infield.`);
+    if (outfieldCount[id] === 0) violations.push(`Rule 1: ${name} never plays outfield.`);
+  });
+
+  // Rule 2: no 3 consecutive outfield (excluding bench)
+  playerIds.forEach(id => {
+    const name = PLAYERS.find(p=>p.id===id).name;
+    let streak = 0;
+    ofHistory[id].forEach(h => {
+      if (h === 'O') { streak++; if (streak >= 3) violations.push(`Rule 2: ${name} has 3+ consecutive outfield innings.`); }
+      else if (h === 'B') { /* bench doesn't reset or extend */ }
+      else { streak = 0; }
+    });
+  });
+
+  // Rule 3: bench rotation
+  const benchSeq = benchSlot.filter(b => b !== null);
+  if (benchSeq.length > 0) {
+    const bCounts = {};
+    playerIds.forEach(id => bCounts[id] = 0);
+    for (let i = 0; i < benchSeq.length; i++) {
+      const pid = benchSeq[i];
+      const minSoFar = Math.min(...Object.values(bCounts));
+      if (bCounts[pid] > minSoFar) {
+        const name = PLAYERS.find(p=>p.id===pid).name;
+        violations.push(`Rule 3: ${name} sat out more than once before all players sat once.`);
+      }
+      bCounts[pid]++;
+    }
+  }
+
+  // Rule 4: every player must play at least 1 infield in first 3 innings
+  for (let inn = 0; inn < 3; inn++) {
+    playerIds.forEach(id => {
+      if (benchSlot[inn] === id) return;
+      const posInInning = schedule[inn].findIndex(pid => pid === id);
+      if (posInInning === -1) return;
+    });
+  }
+  // Check cumulative after inning 2
+  const ifByHalf = {};
+  playerIds.forEach(id => { ifByHalf[id] = 0; });
+  for (let inn = 0; inn < 3; inn++) {
+    for (let pos = 0; pos < NUM_POSITIONS; pos++) {
+      const pid = schedule[inn][pos];
+      if (pid !== null && INFIELD_POS.includes(pos)) ifByHalf[pid]++;
+    }
+  }
+  playerIds.forEach(id => {
+    const name = PLAYERS.find(p=>p.id===id).name;
+    // If player was on bench all 3 first innings, skip — but that can't happen with 6 innings
+    const benchedFirst3 = [0,1,2].filter(i => benchSlot[i] === id).length;
+    if (benchedFirst3 < 3 && ifByHalf[id] === 0) {
+      violations.push(`Rule 4: ${name} has no infield innings in the first 3 innings.`);
+    }
+  });
+
+  // Rule 5: every player must have at least 2 infield innings
+  playerIds.forEach(id => {
+    const name = PLAYERS.find(p=>p.id===id).name;
+    if (infieldCount[id] < 2) violations.push(`Rule 5: ${name} has only ${infieldCount[id]} infield inning(s), needs 2.`);
+  });
+
+  return [...new Set(violations)]; // deduplicate
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function renderLineup(result, playerIds) {
+  const { schedule, benchSlot, violationMessages } = result;
+  const n = playerIds.length;
+
+  document.getElementById('placeholderMsg').style.display = 'none';
+  document.getElementById('lineupSection').classList.add('visible');
+  document.getElementById('statsSection').classList.add('visible');
+
+  document.getElementById('lineupTitle').textContent = 'Defense Lineup';
+  document.getElementById('lineupMeta').textContent =
+    `${n} players · 6 innings · ${n === 10 ? '1 bench slot per inning' : 'full field each inning'}`;
+
+  // Success / violations
+  const successBanner = document.getElementById('successBanner');
+  const violationsBox  = document.getElementById('violationsBox');
+  if (violationMessages.length === 0) {
+    successBanner.classList.add('visible');
+    violationsBox.classList.remove('visible');
+  } else {
+    successBanner.classList.remove('visible');
+    violationsBox.classList.add('visible');
+    const ul = document.getElementById('violationsList');
+    ul.innerHTML = violationMessages.map(v => `<li>${v}</li>`).join('');
+  }
+
+  // Inning cards
+  const container = document.getElementById('inningCards');
+  container.innerHTML = '';
+  const ordinals = ['1st','2nd','3rd','4th','5th','6th'];
+
+  for (let inn = 0; inn < NUM_INNINGS; inn++) {
+    const card = document.createElement('div');
+    card.className = 'inning-card';
+
+    const benchPid = benchSlot[inn];
+    const benchName = benchPid !== null ? PLAYERS.find(p=>p.id===benchPid).name : null;
+
+    let headerHtml = `
+      <div class="inning-header">
+        <div>
+          <div class="inning-num">Inning ${inn+1}</div>
+          <div class="inning-label">${ordinals[inn]} inning</div>
+        </div>
+        ${benchName ? `<div class="bench-tag">🪑 Bench: ${benchName}</div>` : ''}
+      </div>
+    `;
+
+    let gridHtml = '<div class="positions-grid">';
+    for (let pos = 0; pos < NUM_POSITIONS; pos++) {
+      const pid = schedule[inn][pos];
+      const pname = pid !== null ? PLAYERS.find(p=>p.id===pid).name : '—';
+      const posInfo = POSITIONS[pos];
+      gridHtml += `
+        <div class="position-cell ${posInfo.type}">
+          <div class="pos-label">${posInfo.label}</div>
+          <div class="pos-name">${pname}</div>
+          <div class="pos-abbr">${posInfo.abbr}</div>
+        </div>
+      `;
+    }
+    gridHtml += '</div>';
+
+    card.innerHTML = headerHtml + gridHtml;
+    container.appendChild(card);
+  }
+
+  // Stats summary
+  renderStats(schedule, benchSlot, playerIds);
+}
+
+function renderStats(schedule, benchSlot, playerIds) {
+  const tbody = document.getElementById('statsBody');
+  tbody.innerHTML = '';
+
+  playerIds.forEach(id => {
+    const player = PLAYERS.find(p=>p.id===id);
+    const row = document.createElement('tr');
+
+    let infieldCount = 0, outfieldCount = 0, catcherCount = 0, benchCount = 0;
+    const dots = [];
+
+    for (let inn = 0; inn < NUM_INNINGS; inn++) {
+      if (benchSlot[inn] === id) {
+        benchCount++;
+        dots.push({type:'bench', label:'B'});
+        continue;
+      }
+      const pos = schedule[inn].findIndex(pid => pid === id);
+      if (pos === -1) { dots.push({type:'bench', label:'?'}); continue; }
+      if (INFIELD_POS.includes(pos))  { infieldCount++;  dots.push({type:'infield',  label:POSITIONS[pos].abbr}); }
+      else if (OUTFIELD_POS.includes(pos)) { outfieldCount++; dots.push({type:'outfield', label:POSITIONS[pos].abbr}); }
+      else { catcherCount++; dots.push({type:'catcher', label:'C'}); }
+    }
+
+    const dotsHtml = dots.map(d =>
+      `<div class="dot ${d.type}" title="${d.type}">${d.label}</div>`
+    ).join('');
+
+    row.innerHTML = `
+      <td class="player-col">${player.name}</td>
+      <td><div class="inning-dots">${dotsHtml}</div></td>
+      <td>${infieldCount}</td>
+      <td>${outfieldCount}</td>
+      <td>${catcherCount}</td>
+      <td>${benchCount}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+buildRoster();
+</script>
+</body>
+</html>
