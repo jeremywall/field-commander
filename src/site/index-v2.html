@@ -27,7 +27,6 @@
     background: var(--grass);
     color: var(--cream);
     font-family: 'Source Serif 4', serif;
-    font-size: 16px;
     min-height: 100vh;
     overflow-x: hidden;
     background-image:
@@ -72,19 +71,13 @@
   .main {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px 16px;
+    padding: 30px 16px;
     display: grid;
-    grid-template-columns: 380px 1fr;
+    grid-template-columns: 340px 1fr;
     gap: 24px;
     align-items: start;
   }
-  @media (max-width: 900px) { 
-    .main { 
-      grid-template-columns: 1fr; 
-      padding: 16px 12px;
-      gap: 20px;
-    } 
-  }
+  @media (max-width: 860px) { .main { grid-template-columns: 1fr; } }
 
   .panel {
     background: rgba(0,0,0,0.35);
@@ -102,7 +95,7 @@
   }
   .panel-header h2 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     letter-spacing: 0.1em;
     color: var(--gold);
   }
@@ -120,7 +113,7 @@
   .roster-header-row .rh-present {
     margin-left: auto;
     font-family: 'Oswald', sans-serif;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 600;
     letter-spacing: 0.12em;
     color: rgba(255,255,255,0.3);
@@ -130,7 +123,7 @@
   }
   .roster-header-row .rh-catcher {
     font-family: 'Oswald', sans-serif;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 600;
     letter-spacing: 0.12em;
     color: rgba(212,168,67,0.5);
@@ -139,19 +132,18 @@
     text-align: center;
   }
 
-  .roster-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .roster-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
   .roster-item {
     display: grid;
-    grid-template-columns: 24px 32px 1fr auto auto;
+    grid-template-columns: 22px 28px 1fr auto auto;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
+    gap: 8px;
+    padding: 7px 10px;
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 3px;
     transition: background 0.15s, border-color 0.15s;
     user-select: none;
-    min-height: 52px;
   }
   .roster-item:hover { background: rgba(255,255,255,0.07); }
   .roster-item.present {
@@ -163,14 +155,14 @@
   }
 
   .cb-present {
-    width: 20px; height: 20px;
+    width: 18px; height: 18px;
     accent-color: #6fba6f;
     cursor: pointer;
     flex-shrink: 0;
   }
   .player-num {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.2rem;
+    font-size: 1.05rem;
     color: var(--dirt-light);
     text-align: right;
     letter-spacing: 0.03em;
@@ -178,7 +170,7 @@
   .player-name {
     font-family: 'Oswald', sans-serif;
     font-weight: 400;
-    font-size: 1rem;
+    font-size: 0.9rem;
     letter-spacing: 0.04em;
     color: var(--cream);
     cursor: pointer;
@@ -188,16 +180,15 @@
   .catcher-toggle {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    border-radius: 14px;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 12px;
     border: 1px solid rgba(212,168,67,0.2);
     background: transparent;
     cursor: pointer;
     transition: all 0.15s;
     opacity: 0.35;
     pointer-events: none; /* disabled until player is present */
-    min-height: 36px;
   }
   .roster-item.present .catcher-toggle {
     opacity: 1;
@@ -208,28 +199,28 @@
     border-color: rgba(212,168,67,0.6);
   }
   .catcher-toggle .ct-glove {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     line-height: 1;
   }
   .catcher-toggle .ct-label {
     font-family: 'Oswald', sans-serif;
-    font-size: 0.7rem;
+    font-size: 0.62rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     color: var(--gold);
     text-transform: uppercase;
   }
 
-  .select-controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .select-controls { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
   .select-controls button {
     flex: 1;
-    min-width: 90px;
-    padding: 8px 10px;
+    min-width: 80px;
+    padding: 5px 8px;
     background: transparent;
     border: 1px solid rgba(255,255,255,0.12);
     color: rgba(255,255,255,0.55);
     font-family: 'Oswald', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.72rem;
     letter-spacing: 0.05em;
     cursor: pointer;
     border-radius: 2px;
@@ -240,12 +231,12 @@
   .compute-btn {
     width: 100%;
     margin-top: 14px;
-    padding: 16px;
+    padding: 14px;
     background: var(--red);
     border: none;
     color: var(--chalk);
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.35rem;
     letter-spacing: 0.15em;
     cursor: pointer;
     border-radius: 3px;
@@ -263,26 +254,24 @@
     justify-content: space-between;
     align-items: center;
     margin-top: 10px;
-    padding: 8px 4px;
+    padding: 6px 4px;
     font-family: 'Oswald', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: rgba(255,255,255,0.4);
     letter-spacing: 0.04em;
-    flex-wrap: wrap;
-    gap: 10px;
   }
   .status-bar .count-present span { color: #6fba6f; font-weight: 600; }
   .status-bar .count-catchers span { color: var(--gold); font-weight: 600; }
 
   .message-box {
-    padding: 10px 14px;
+    padding: 9px 12px;
     border-radius: 3px;
     font-family: 'Oswald', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     letter-spacing: 0.03em;
     margin-top: 10px;
     display: none;
-    line-height: 1.5;
+    line-height: 1.4;
   }
   .message-box.error { background: rgba(192,57,43,0.2); border: 1px solid rgba(192,57,43,0.4); color: #f1a090; display: block; }
   .message-box.info  { background: rgba(212,168,67,0.1); border: 1px solid rgba(212,168,67,0.3); color: var(--gold); display: block; }
@@ -291,17 +280,17 @@
   .lineup-section { display: none; }
   .lineup-section.visible { display: block; }
 
-  .lineup-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 4px; }
-  .lineup-meta { font-family: 'Oswald', sans-serif; font-size: 0.9rem; color: rgba(255,255,255,0.38); letter-spacing: 0.05em; margin-bottom: 14px; }
+  .lineup-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 3px; }
+  .lineup-meta { font-family: 'Oswald', sans-serif; font-size: 0.78rem; color: rgba(255,255,255,0.38); letter-spacing: 0.05em; margin-bottom: 14px; }
 
   .success-banner {
     margin-bottom: 14px;
-    padding: 11px 14px;
+    padding: 9px 14px;
     background: rgba(45,90,45,0.3);
     border: 1px solid rgba(45,90,45,0.5);
     border-radius: 3px;
     font-family: 'Oswald', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     color: #9fd99f;
     letter-spacing: 0.04em;
     display: none; align-items: center; gap: 8px;
@@ -310,12 +299,12 @@
 
   .violations-box {
     margin-bottom: 14px;
-    padding: 11px 14px;
+    padding: 9px 14px;
     background: rgba(192,57,43,0.12);
     border: 1px solid rgba(192,57,43,0.3);
     border-radius: 3px;
     font-family: 'Oswald', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.78rem;
     color: #f1a090;
     display: none;
   }
@@ -339,39 +328,33 @@
   .inning-header {
     background: rgba(0,0,0,0.35);
     border-bottom: 1px solid rgba(255,255,255,0.05);
-    padding: 10px 14px;
+    padding: 9px 14px;
     display: flex; align-items: center; gap: 12px;
-    flex-wrap: wrap;
   }
-  .inning-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--dirt-light); letter-spacing: 0.05em; line-height: 1; }
-  .inning-label { font-family: 'Oswald', sans-serif; font-weight: 300; font-size: 0.8rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.35); text-transform: uppercase; }
+  .inning-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--dirt-light); letter-spacing: 0.05em; line-height: 1; }
+  .inning-label { font-family: 'Oswald', sans-serif; font-weight: 300; font-size: 0.7rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.35); text-transform: uppercase; }
   .bench-tag {
     margin-left: auto;
     background: var(--bench);
     border: 1px solid rgba(255,255,255,0.1);
-    padding: 5px 10px;
+    padding: 3px 10px;
     border-radius: 2px;
     font-family: 'Oswald', sans-serif;
-    font-size: 0.8rem;
+    font-size: 0.68rem;
     letter-spacing: 0.1em;
     color: var(--dirt-light);
   }
 
   .positions-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 1px;
     background: rgba(255,255,255,0.035);
   }
-  @media (max-width: 600px) {
-    .positions-grid {
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    }
-  }
   .position-cell {
     background: rgba(0,0,0,0.18);
-    padding: 10px 12px;
-    display: flex; flex-direction: column; gap: 3px;
+    padding: 9px 11px;
+    display: flex; flex-direction: column; gap: 2px;
     transition: background 0.12s;
   }
   .position-cell:hover { background: rgba(255,255,255,0.04); }
@@ -379,31 +362,31 @@
   .position-cell.outfield { border-left: 2px solid var(--grass-light); }
   .position-cell.catcher  { border-left: 2px solid var(--gold); }
   .position-cell.vacant   { border-left: 2px solid rgba(255,255,255,0.1); opacity: 0.4; }
-  .pos-label { font-family: 'Bebas Neue', sans-serif; font-size: 0.8rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); }
-  .pos-name  { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 1rem; color: var(--cream); letter-spacing: 0.03em; }
-  .pos-abbr  { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: rgba(255,255,255,0.18); }
+  .pos-label { font-family: 'Bebas Neue', sans-serif; font-size: 0.72rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); }
+  .pos-name  { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 0.88rem; color: var(--cream); letter-spacing: 0.03em; }
+  .pos-abbr  { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: rgba(255,255,255,0.18); }
   .pos-name.is-catcher-vol { color: var(--gold); }
 
   /* STATS */
   .stats-section { margin-top: 18px; display: none; }
   .stats-section.visible { display: block; }
 
-  .stats-table { width: 100%; border-collapse: collapse; font-family: 'Oswald', sans-serif; font-size: 0.9rem; }
+  .stats-table { width: 100%; border-collapse: collapse; font-family: 'Oswald', sans-serif; font-size: 0.78rem; }
   .stats-table th {
-    background: var(--ink); color: var(--gold); padding: 9px 10px; text-align: left;
-    font-weight: 600; letter-spacing: 0.08em; font-size: 0.8rem; text-transform: uppercase;
+    background: var(--ink); color: var(--gold); padding: 7px 9px; text-align: left;
+    font-weight: 600; letter-spacing: 0.08em; font-size: 0.68rem; text-transform: uppercase;
     border-bottom: 2px solid var(--dirt);
   }
-  .stats-table td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); color: rgba(255,255,255,0.72); }
+  .stats-table td { padding: 6px 9px; border-bottom: 1px solid rgba(255,255,255,0.04); color: rgba(255,255,255,0.72); }
   .stats-table tr:hover td { background: rgba(255,255,255,0.025); }
   .stats-table .player-col { font-weight: 600; color: var(--cream); letter-spacing: 0.03em; }
-  .stats-table .catcher-star { color: var(--gold); font-size: 0.7rem; vertical-align: super; }
+  .stats-table .catcher-star { color: var(--gold); font-size: 0.6rem; vertical-align: super; }
 
   .inning-dots { display: flex; gap: 3px; align-items: center; flex-wrap: wrap; }
   .dot {
-    width: 26px; height: 26px; border-radius: 2px;
+    width: 22px; height: 22px; border-radius: 2px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.65rem; font-weight: 600; line-height: 1; text-align: center;
+    font-size: 0.58rem; font-weight: 600; line-height: 1; text-align: center;
   }
   .dot.infield  { background: rgba(139,94,60,0.55); color: #e8c49a; }
   .dot.outfield { background: rgba(45,90,45,0.55);  color: #9fd99f; }
@@ -412,11 +395,11 @@
 
   .legend {
     display: flex; gap: 14px; flex-wrap: wrap;
-    margin-bottom: 10px; padding: 10px 12px;
+    margin-bottom: 10px; padding: 8px 12px;
     background: rgba(0,0,0,0.18); border-radius: 3px; border: 1px solid rgba(255,255,255,0.04);
   }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-family: 'Oswald', sans-serif; font-size: 0.8rem; color: rgba(255,255,255,0.5); letter-spacing: 0.04em; }
-  .legend-dot  { width: 12px; height: 12px; border-radius: 1px; flex-shrink: 0; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-family: 'Oswald', sans-serif; font-size: 0.7rem; color: rgba(255,255,255,0.5); letter-spacing: 0.04em; }
+  .legend-dot  { width: 11px; height: 11px; border-radius: 1px; flex-shrink: 0; }
 
   .divider { height: 1px; background: rgba(255,255,255,0.05); margin: 18px 0; }
 
@@ -425,15 +408,14 @@
   /* No-catcher notice */
   .no-catcher-notice {
     font-family: 'Oswald', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.72rem;
     color: rgba(212,168,67,0.6);
     letter-spacing: 0.04em;
-    margin-top: 8px;
-    padding: 7px 10px;
+    margin-top: 6px;
+    padding: 5px 8px;
     background: rgba(212,168,67,0.06);
     border-radius: 2px;
     display: none;
-    line-height: 1.4;
   }
   .no-catcher-notice.visible { display: block; }
 </style>
@@ -470,10 +452,11 @@
           <button onclick="clearCatchers()" style="color:rgba(212,168,67,0.7);border-color:rgba(212,168,67,0.2)">Clear Catchers</button>
         </div>
 
+        <!-- Column headers -->
         <div class="roster-header-row">
-          <div style="width:24px"></div>
-          <div style="width:32px"></div>
-          <div style="flex:1; font-family:'Oswald',sans-serif; font-size:0.75rem; color:rgba(255,255,255,0.3); letter-spacing:0.1em; text-transform:uppercase;">Player</div>
+          <div style="width:22px"></div>
+          <div style="width:28px"></div>
+          <div style="flex:1; font-family:'Oswald',sans-serif; font-size:0.65rem; color:rgba(255,255,255,0.3); letter-spacing:0.1em; text-transform:uppercase;">Player</div>
           <div class="rh-catcher">⚾ Catch</div>
         </div>
 
