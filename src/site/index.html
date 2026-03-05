@@ -398,6 +398,7 @@
   .stats-table tr:hover td { background: rgba(255,255,255,0.025); }
   .stats-table .player-col { font-weight: 600; color: var(--cream); letter-spacing: 0.03em; }
   .stats-table .catcher-star { color: var(--gold); font-size: 0.7rem; vertical-align: super; }
+  .stats-table .variety-note { font-size: 0.75rem; color: rgba(255,255,255,0.35); font-style: italic; margin-left: 4px; }
 
   .inning-dots { display: flex; gap: 3px; align-items: center; flex-wrap: wrap; }
   .dot {
@@ -601,7 +602,7 @@ function buildRoster() {
       <span class="player-num">#${p.num}</span>
       <label class="player-name" for="cbp${p.id}">${p.name}</label>
       <button class="catcher-toggle" id="cbt${p.id}" onclick="toggleCatcher(${p.id}, event)" title="Willing to catch?">
-        <span class="ct-glove">⚾</span>
+        <span class="ct-glove">🥊</span>
         <span class="ct-label">C</span>
       </button>
     `;
@@ -712,7 +713,11 @@ function tryAssign(playerIds, catcherIds, hasBench) {
   });
   const benchSlot = Array(NUM_INNINGS).fill(null);
   const S = {};
-  playerIds.forEach(id => S[id] = { if: 0, of: 0, c: 0, bench: 0, ofStreak: 0 });
+  playerIds.forEach(id => {
+    S[id] = { if: 0, of: 0, c: 0, bench: 0, ofStreak: 0, posCount: {} };
+    // Track how many times each player has played each position
+    POSITIONS.forEach(pos => S[id].posCount[pos.abbr] = 0);
+  });
   const benchUsed = {};
   playerIds.forEach(id => benchUsed[id] = 0);
 
@@ -826,7 +831,19 @@ function tryAssign(playerIds, catcherIds, hasBench) {
       (innLeft - Math.max(0, minIF - S[a].if)) - (innLeft - Math.max(0, minIF - S[b].if))
     );
 
-    for (const id of neutralSorted) {
+    // Add randomization: shuffle neutralSorted within same urgency level
+    const grouped = {};
+    neutralSorted.forEach(id => {
+      const slack = innLeft - Math.max(0, minIF - S[id].if);
+      if (!grouped[slack]) grouped[slack] = [];
+      grouped[slack].push(id);
+    });
+    const neutralShuffled = [];
+    Object.keys(grouped).sort((a,b) => a - b).forEach(slack => {
+      neutralShuffled.push(...shuffle(grouped[slack]));
+    });
+
+    for (const id of neutralShuffled) {
       const s = S[id];
       const ofUrgent = s.of === 0 && innLeft <= 3;
       const ifUrgent = minIF > 0 && (minIF - s.if) >= (innLeft - 1);
@@ -851,25 +868,79 @@ function tryAssign(playerIds, catcherIds, hasBench) {
       schedule[inn][1] = catcherThisInning;
       S[catcherThisInning].c++;
       S[catcherThisInning].ofStreak = 0;
+      S[catcherThisInning].posCount['C']++;
     }
 
+    // DIVERSIFIED INFIELD ASSIGNMENT
+    // Instead of random shuffle, match players to positions they've played least
     const ifPos = shuffle([...INFIELD_POS]);
-    for (let i = 0; i < ifPlayers.length; i++) {
-      schedule[inn][ifPos[i]] = ifPlayers[i];
-      S[ifPlayers[i]].if++;
-      S[ifPlayers[i]].ofStreak = 0;
-    }
+    const ifPlayersCopy = [...ifPlayers];
+    const assigned = new Set();
+    
+    // For each infield position, pick the player who has played it least
+    ifPos.forEach((pos, idx) => {
+      if (idx >= ifPlayersCopy.length) return;
+      
+      const posAbbr = POSITIONS[pos].abbr;
+      const available = ifPlayersCopy.filter(pid => !assigned.has(pid));
+      
+      if (available.length === 0) return;
+      
+      // Sort by: (1) how many times they've played this position (least first)
+      //          (2) random tiebreaker
+      available.sort((a, b) => {
+        const aCount = S[a].posCount[posAbbr] || 0;
+        const bCount = S[b].posCount[posAbbr] || 0;
+        if (aCount !== bCount) return aCount - bCount;
+        return Math.random() - 0.5;
+      });
+      
+      const selectedPlayer = available[0];
+      schedule[inn][pos] = selectedPlayer;
+      S[selectedPlayer].if++;
+      S[selectedPlayer].ofStreak = 0;
+      S[selectedPlayer].posCount[posAbbr]++;
+      assigned.add(selectedPlayer);
+    });
 
+    // DIVERSIFIED OUTFIELD ASSIGNMENT
     // Give outfield preference to players who haven't played OF yet
     const needsOF  = shuffle(ofPlayers.filter(id => S[id].of === 0));
     const alreadyOF = shuffle(ofPlayers.filter(id => S[id].of > 0));
     const ofOrdered = [...needsOF, ...alreadyOF];
+    
     const ofPos = shuffle([...OUTFIELD_POS]);
-    for (let i = 0; i < ofOrdered.length; i++) {
-      schedule[inn][ofPos[i]] = ofOrdered[i];
-      S[ofOrdered[i]].of++;
-      S[ofOrdered[i]].ofStreak++;
-    }
+    const ofAssigned = new Set();
+    
+    // Match each OF position to the player who has played it least
+    ofPos.forEach((pos, idx) => {
+      if (idx >= ofOrdered.length) return;
+      
+      const posAbbr = POSITIONS[pos].abbr;
+      const available = ofOrdered.filter(pid => !ofAssigned.has(pid));
+      
+      if (available.length === 0) return;
+      
+      // Sort by: (1) need OF first, (2) least times at this position, (3) random
+      available.sort((a, b) => {
+        const aNeedsOF = S[a].of === 0 ? 0 : 1;
+        const bNeedsOF = S[b].of === 0 ? 0 : 1;
+        if (aNeedsOF !== bNeedsOF) return aNeedsOF - bNeedsOF;
+        
+        const aCount = S[a].posCount[posAbbr] || 0;
+        const bCount = S[b].posCount[posAbbr] || 0;
+        if (aCount !== bCount) return aCount - bCount;
+        
+        return Math.random() - 0.5;
+      });
+      
+      const selectedPlayer = available[0];
+      schedule[inn][pos] = selectedPlayer;
+      S[selectedPlayer].of++;
+      S[selectedPlayer].ofStreak++;
+      S[selectedPlayer].posCount[posAbbr]++;
+      ofAssigned.add(selectedPlayer);
+    });
   }
 
   const vMsgs = validateSchedule(schedule, benchSlot, playerIds, INFIELD_POS, OUTFIELD_POS, minIF);
