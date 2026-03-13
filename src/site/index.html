@@ -398,6 +398,18 @@
   .stats-table tr:hover td { background: rgba(255,255,255,0.025); }
   .stats-table .player-col { font-weight: 600; color: var(--cream); letter-spacing: 0.03em; }
   .stats-table .catcher-star { color: var(--gold); font-size: 0.7rem; vertical-align: super; }
+  .stats-table .first-base-badge { 
+    display: inline-block;
+    margin-left: 5px;
+    padding: 2px 5px;
+    background: rgba(139,94,60,0.3);
+    border: 1px solid rgba(139,94,60,0.5);
+    border-radius: 2px;
+    font-size: 0.65rem;
+    color: #e8c49a;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
   .stats-table .variety-note { font-size: 0.75rem; color: rgba(255,255,255,0.35); font-style: italic; margin-left: 4px; }
 
   .inning-dots { display: flex; gap: 3px; align-items: center; flex-wrap: wrap; }
@@ -530,6 +542,7 @@
           <div class="legend-item"><div class="legend-dot" style="background:rgba(212,168,67,0.25)"></div>Catcher</div>
           <div class="legend-item"><div class="legend-dot" style="background:rgba(90,62,43,0.45)"></div>Bench</div>
           <div class="legend-item" style="margin-left:auto;color:var(--gold);font-size:0.65rem;">⭐ = catcher volunteer</div>
+          <div class="legend-item" style="color:#e8c49a;font-size:0.65rem;"><span style="padding:2px 5px;background:rgba(139,94,60,0.3);border:1px solid rgba(139,94,60,0.5);border-radius:2px;font-weight:600;">1B</span> = 1st base priority</div>
         </div>
         <table class="stats-table">
           <thead>
@@ -569,6 +582,9 @@ const PLAYERS = [
   { id: 8, name: "Niko",  num: "2"  },
   { id: 9, name: "Owen",  num: "5"  },
 ];
+
+// Players who should get priority at first base (ids)
+const FIRST_BASE_PREFERRED = [5, 9]; // Gabe and Owen
 
 // All 9 standard positions
 const POSITIONS = [
@@ -873,14 +889,45 @@ function tryAssign(playerIds, catcherIds, hasBench) {
 
     // DIVERSIFIED INFIELD ASSIGNMENT
     // Instead of random shuffle, match players to positions they've played least
+    // Special case: Give 1B preference to Gabe and Owen
     const ifPos = shuffle([...INFIELD_POS]);
     const ifPlayersCopy = [...ifPlayers];
     const assigned = new Set();
     
-    // For each infield position, pick the player who has played it least
-    ifPos.forEach((pos, idx) => {
-      if (idx >= ifPlayersCopy.length) return;
+    // Find 1B position index if it exists in active positions
+    const firstBaseIdx = ifPos.indexOf(2); // Position 2 is 1B
+    
+    // If 1B is in this inning's positions, try to assign Gabe or Owen first
+    if (firstBaseIdx !== -1) {
+      const preferredAvailable = ifPlayersCopy.filter(pid => 
+        FIRST_BASE_PREFERRED.includes(pid) && !assigned.has(pid)
+      );
       
+      if (preferredAvailable.length > 0) {
+        // Sort preferred players by how many times they've played 1B (least first)
+        preferredAvailable.sort((a, b) => {
+          const aCount = S[a].posCount['1B'] || 0;
+          const bCount = S[b].posCount['1B'] || 0;
+          if (aCount !== bCount) return aCount - bCount;
+          return Math.random() - 0.5;
+        });
+        
+        // 80% chance to use preferred player, 20% chance to use someone else for variety
+        if (Math.random() < 0.8) {
+          const selectedPlayer = preferredAvailable[0];
+          schedule[inn][2] = selectedPlayer; // Assign to 1B
+          S[selectedPlayer].if++;
+          S[selectedPlayer].ofStreak = 0;
+          S[selectedPlayer].posCount['1B']++;
+          assigned.add(selectedPlayer);
+          // Remove 1B from positions to assign
+          ifPos.splice(firstBaseIdx, 1);
+        }
+      }
+    }
+    
+    // Assign remaining infield positions
+    ifPos.forEach((pos, idx) => {
       const posAbbr = POSITIONS[pos].abbr;
       const available = ifPlayersCopy.filter(pid => !assigned.has(pid));
       
@@ -1150,7 +1197,9 @@ function renderStats(schedule, benchSlot, playerIds, catcherIds, INFIELD_POS, OU
 
     const row = document.createElement('tr');
     row.innerHTML = `
-      <td class="player-col">${player.name}${isVol ? '<span class="catcher-star">⭐</span>' : ''}</td>
+      <td class="player-col">
+        ${player.name}${isVol ? '<span class="catcher-star">⭐</span>' : ''}${FIRST_BASE_PREFERRED.includes(id) ? '<span class="first-base-badge">1B</span>' : ''}
+      </td>
       <td><div class="inning-dots">${dotsHtml}</div></td>
       <td>${ifCount}</td>
       <td>${ofCount}</td>
